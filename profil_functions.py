@@ -68,7 +68,7 @@ def measure_field_size(cm_array, percent_array):
             field_dimensions.append(cm_array[original_index])
             break
 
-    return field_dimensions[1] - field_dimensions[0]
+    return field_dimensions
 
 
 def measure_penumbra(cm_array, percent_array, percent_range):
