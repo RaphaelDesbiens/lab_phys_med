@@ -1,5 +1,6 @@
 from scipy.optimize import curve_fit
 import numpy as np
+from math import exp, sqrt
 
 
 def linear_function(x, m, b):
@@ -32,3 +33,26 @@ def gaussian_function(x, a, mu, sigma, b):
 def gaussian_fit(x, y, guesses):
 
     return curve_fit(gaussian_function, x, y, guesses)
+
+
+def pdd_function(x, a_pdd, n, mu, b_pdd):
+    num_1 = x
+    denom_1 = np.sqrt(x**2 + abs(n))
+    expon = np.exp(-mu*x)
+
+    return a_pdd*(num_1/denom_1)*expon + b_pdd
+
+
+def pdd_fit(x, y, guesses):
+
+    return curve_fit(pdd_function, x, y, guesses)
+
+
+def expon_function(x, a, mu):
+
+    return a*np.exp(-x*mu)
+
+
+def expon_fit(x, y):
+
+    return curve_fit(expon_function, x, y)

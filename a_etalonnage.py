@@ -28,6 +28,8 @@ od_zero_fix = optical_densities[-1]
 
 params, covariance = linear_fit(dose_list[1:], optical_densities[1:], intercept=True)
 m = params[0]
+m_cov = covariance[0][0]
+print(f"OD = ({m:.4f} +/- {np.sqrt(m_cov):.4f})D + 0.2314")
 
 
 def od_to_dose(od_list):
@@ -46,7 +48,7 @@ if __name__ == "__main__":
     plt.plot(x_values, y_values, color='red', zorder=10)
     plt.plot(x_dash, y_dash, '--', color='red', zorder=10, linewidth=0.5)
 
-    plt.title("Courbe d'étalonnage de la densité optique des films EBT3 en fonction de la dose absorbée")
+    # plt.title("Courbe d'étalonnage de la densité optique des films EBT3 en fonction de la dose absorbée")
     plt.xlabel('Dose (Gy)')
     plt.ylabel('Densité optique')
 

@@ -58,7 +58,8 @@ for index, od_profil in enumerate(od_profiles):
             break
     range_100.append(range_100[0] + 1000)
 
-    percent_array = normalize_field_profile(dose_array, range_100)
+    percent_array, top_dose = normalize_field_profile(dose_array, range_100)
+    print(f"top_dose = {top_dose}")
 
     # if file_names[index][-2:] == "2y" or file_names[index][-2:] == "1x":
     #     cm_array = cm_array*1.286 - 0.6

@@ -45,7 +45,7 @@ for i, file_name in enumerate(file_names):
             break
     range_100.append(range_100[0] + 1441)
 
-    percent_array = normalize_field_profile(np.array(od_list), range_100)
+    percent_array, top_od = normalize_field_profile(np.array(od_list), range_100)
 
     plt.scatter(cm_array, percent_array, color=color_list[i], s=0.4, label=file_name[-1])
 

@@ -35,16 +35,20 @@ def pixel_to_cm(pixel_list):
 
 
 def apply_ppwt_factor(x_array):
-
+    """
+    Puisque j'obtenais des valeurs de gris inconsistentes d'une fois à l'autre que je faisais mes profils sur
+    imageJ, j'ai pris tous les scans et je les ai groupé en une image pour pouvoir faire tous mes profils en une seule
+    batch. Le fait de les grouper a changé la résolution, d'où le facteur suivant.
+    """
     return x_array*1.286 - 0.6
 
 
 def normalize_field_profile(dose_array, range_100):
     start = range_100[0]
     end = range_100[1]
-    top = stat.mean(dose_array[start:end])
+    top_dose = stat.mean(dose_array[start:end])
 
-    return 100*dose_array/top
+    return 100*dose_array/top_dose, top_dose
 
 
 def normalize_slanted_field_profile(dose_array, slanted_mean_range):
@@ -54,7 +58,7 @@ def normalize_slanted_field_profile(dose_array, slanted_mean_range):
         if slanted_mean > top_dose:
             top_dose = slanted_mean
 
-    return 100*dose_array/top_dose
+    return 100*dose_array/top_dose, top_dose
 
 def measure_field_size(cm_array, percent_array):
     field_dimensions = []

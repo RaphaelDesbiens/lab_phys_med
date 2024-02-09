@@ -2,7 +2,8 @@ import matplotlib.pyplot as plt
 from profil_functions import read_profil, gray_to_od, pixel_to_cm, normalize_field_profile, \
     measure_field_size, measure_penumbra, smooth, normalize_slanted_field_profile, apply_ppwt_factor
 from a_etalonnage import od_to_dose
-import statistics as stat
+from fit_functions import linear_fit
+import numpy as np
 
 file_names = ["c) px", "c) py", "c) dx", "c) dy"]
 
@@ -12,9 +13,11 @@ offset_od_parameter = 0.29
 offset_pixel_parameter = 250
 top_cm_parameter = 3.5
 go_smooth = True
-smooth_range = 35
+smooth_range = 5
 cut_range = int((smooth_range - 1)/2)
 slanted_mean_range = 60
+top_doze_10cm_b_200MU = 2.37      # Gy
+top_doze_10cm_b_250MU = 2.5*top_doze_10cm_b_200MU/2
 
 # low_percent_pen_list = [30, 30, 35, 35]
 # high_percent_pen_list =[80, 80, 80, 80]
@@ -51,7 +54,7 @@ for index, od_profil in enumerate(od_profiles):
     dose_array = od_to_dose(od_list)
     # plt.scatter(cm_array, dose_array, color=color_list[index], s=1, label=file_names[index][-2:])
 
-    percent_array = None
+    percent_array, top_doze = None, None
     if file_names[index][-1] == "x":
         range_100 = []
         for ind, cm in enumerate(cm_array):
@@ -59,9 +62,38 @@ for index, od_profil in enumerate(od_profiles):
                 range_100.append(ind)
                 break
         range_100.append(range_100[0] + 1120)
-        percent_array = normalize_field_profile(dose_array, range_100)
+        percent_array, top_doze = normalize_field_profile(dose_array, range_100)
     else:
-        percent_array = normalize_slanted_field_profile(dose_array, slanted_mean_range)
+        percent_array, top_doze = normalize_slanted_field_profile(dose_array, slanted_mean_range)
+        slanted_field_edges = measure_field_size(cm_array, percent_array)
+        slanted_field_size = slanted_field_edges[1] - slanted_field_edges[0]
+        slanted_field_left = slanted_field_edges[0] + 0.05 * slanted_field_size
+        slanted_field_right = slanted_field_edges[1] - 0.05 * slanted_field_size
+        slanted_field_indexes = []
+        for i, cm in enumerate(cm_array):
+            if cm > slanted_field_left:
+                slanted_field_indexes.append(i)
+                break
+        for i, cm in enumerate(cm_array):
+            if cm > slanted_field_right:
+                slanted_field_indexes.append(i - 1)
+                break
+        slanted_percent_array = percent_array[slanted_field_indexes[0]:slanted_field_indexes[1]]
+        slanted_cm_array = cm_array[slanted_field_indexes[0]:slanted_field_indexes[1]]
+        params, covariance = linear_fit(slanted_cm_array, slanted_percent_array)
+        m, b = params[0], params[1]
+        x_values = np.array([cm_array[slanted_field_indexes[0]], cm_array[slanted_field_indexes[1]]])
+        y_values = m*x_values + b
+        plt.plot(x_values, y_values, color=color_list[index])
+
+        middle_cm_index = int((slanted_field_indexes[0] + slanted_field_indexes[1])/2)
+        middle_cm = cm_array[middle_cm_index]
+        middle_percent = m*middle_cm + b
+        middle_dose = top_doze*middle_percent/100
+        # wedge_factor = middle_dose/top_doze_10cm_b_250MU
+        wedge_factor = middle_dose / top_doze_10cm_b_250MU
+        print(f"middle_dose = {middle_dose}")
+        print(f"wedge_factor = {wedge_factor}")
 
     plt.scatter(cm_array, percent_array, color=color_list[index], s=1, label=file_names[index][-2:])
 
