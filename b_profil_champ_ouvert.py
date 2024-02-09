@@ -1,4 +1,6 @@
 import matplotlib.pyplot as plt
+import numpy as np
+
 from profil_functions import read_profil, gray_to_od, pixel_to_cm, normalize_field_profile, \
     measure_field_size, measure_penumbra, smooth, apply_ppwt_factor
 from a_etalonnage import od_to_dose
@@ -88,13 +90,20 @@ for index, od_profil in enumerate(od_profiles):
     homog = homog_max - homog_min
     print(f"Homog. : {homog:.2f} %")
 
-    sym_field_indexes = homog_field_indexes
-    sym_middle_index = int(stat.mean(sym_field_indexes))
-    sym_average_percent_left = stat.mean(sym_percent_array[sym_field_indexes[0]:sym_middle_index])
-    sym_average_percent_right = stat.mean(sym_percent_array[sym_middle_index:sym_field_indexes[1]])
-    sym_deviations = [100*abs(sym_average_percent_left - sym_average_percent_right) / sym_average_percent_left,
-                  100*abs(sym_average_percent_left - sym_average_percent_right) / sym_average_percent_right]
-    sym_deviation = max(sym_deviations)
+    sym_middle_index = int(len(sym_percent_array)/2)
+    s_p_a_left = sym_percent_array[:sym_middle_index]
+    s_p_a_right = sym_percent_array[sym_middle_index:]
+    if len(s_p_a_left) < len(s_p_a_right):
+        s_p_a_left = np.append(s_p_a_left, s_p_a_right[0])
+    if len(s_p_a_left) > len(s_p_a_right):
+        s_p_a_right = np.append(s_p_a_right, s_p_a_left[0])
+    sym_deviation = max(abs(np.array(s_p_a_left) - np.array(s_p_a_right)[::-1]))
+
+#     sym_average_percent_left = stat.mean(sym_percent_array[sym_field_indexes[0]:sym_middle_index])
+#     sym_average_percent_right = stat.mean(sym_percent_array[sym_middle_index:sym_field_indexes[1]])
+#     sym_deviations = [100*abs(sym_average_percent_left - sym_average_percent_right) / sym_average_percent_left,
+#                   100*abs(sym_average_percent_left - sym_average_percent_right) / sym_average_percent_right]
+#     sym_deviation = max(sym_deviations)
     print(f"Sym. : {sym_deviation:.2f} %")
 
 # plt.plot([0, 20],[30, 30])
