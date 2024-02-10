@@ -1,14 +1,13 @@
 import matplotlib.pyplot as plt
 import numpy as np
-
 from profil_functions import read_profil, gray_to_od, pixel_to_cm, normalize_field_profile, \
     measure_field_size, measure_penumbra, smooth, apply_ppwt_factor
 from a_etalonnage import od_to_dose
-import statistics as stat
 
 file_names = ["b) 1x", "b) 1y", "b) 2x", "b) 2y"]
 
 color_list = ['#FF0000', '#008000', '#0000FF', '#FFA500', '#800080', '#00FFFF', '#FF00FF']
+curve_names = [r"d$_{max}$ (x)", r"d$_{max}$ (y)", r"10 cm (x)", r"10 cm (y)"]
 
 offset_od_parameter = 0.33
 offset_pixel_parameter = 250
@@ -17,7 +16,7 @@ go_smooth = True
 smooth_range = 5
 cut_range = int((smooth_range - 1)/2)
 
-low_percent_pen_list = [30, 30, 35, 35]
+low_percent_pen_list = [35, 35, 35, 35]
 high_percent_pen_list =[80, 80, 80, 80]
 
 od_profiles = []
@@ -29,20 +28,16 @@ for file_name in file_names:
         gray_list = smooth(rough_gray_list, smooth_range)
         pixel_list = full_pixel_list[cut_range:-cut_range]
 
-    # plt.plot(pixel_list, gray_list)
-    # plt.scatter(full_pixel_list, rough_gray_list, s=1)
-
     od_list = gray_to_od(gray_list)
     od_profiles.append([pixel_list, od_list])
 
 field_size_list = []
 penumbra_list = []
-
+plt.figure(figsize=(10, 5))
 for index, od_profil in enumerate(od_profiles):
     raw_pixel_list = od_profil[0]
     od_list = od_profil[1]
     pixel_list = []
-    # plt.scatter(raw_pixel_list, od_list, color=color_list[index], s=1, label=file_names[index][-2:])
     for i, od in enumerate(od_list):
         if od > offset_od_parameter:
             offset = offset_pixel_parameter - i
@@ -61,19 +56,17 @@ for index, od_profil in enumerate(od_profiles):
     percent_array, top_dose = normalize_field_profile(dose_array, range_100)
     print(f"top_dose = {top_dose}")
 
-    # if file_names[index][-2:] == "2y" or file_names[index][-2:] == "1x":
-    #     cm_array = cm_array*1.286 - 0.6
-
-    plt.scatter(cm_array, percent_array, color=color_list[index], s=1, label=file_names[index][-2:])
-
     field_edges = measure_field_size(cm_array, percent_array)
     field_size = field_edges[1] - field_edges[0]
+    print(f"field_size = {field_size:.2f}")
     field_size_list.append(field_size)
 
     low_percent_pen = low_percent_pen_list[index]
     high_percent_pen = high_percent_pen_list[index]
     left_penumbra, right_penumbra = measure_penumbra(cm_array, percent_array, [low_percent_pen, high_percent_pen])
     penumbra_list.append([left_penumbra, right_penumbra])
+    print(f"left_penumbra = {left_penumbra:.2f}")
+    print(f"right_penumbra = {right_penumbra:.2f}")
 
     homog_field_left = field_edges[0] + 0.1*field_size
     homog_field_right = field_edges[1] - 0.1 * field_size
@@ -99,17 +92,13 @@ for index, od_profil in enumerate(od_profiles):
     if len(s_p_a_left) > len(s_p_a_right):
         s_p_a_right = np.append(s_p_a_right, s_p_a_left[0])
     sym_deviation = max(abs(np.array(s_p_a_left) - np.array(s_p_a_right)[::-1]))
-
-#     sym_average_percent_left = stat.mean(sym_percent_array[sym_field_indexes[0]:sym_middle_index])
-#     sym_average_percent_right = stat.mean(sym_percent_array[sym_middle_index:sym_field_indexes[1]])
-#     sym_deviations = [100*abs(sym_average_percent_left - sym_average_percent_right) / sym_average_percent_left,
-#                   100*abs(sym_average_percent_left - sym_average_percent_right) / sym_average_percent_right]
-#     sym_deviation = max(sym_deviations)
     print(f"Sym. : {sym_deviation:.2f} %")
 
-# plt.plot([0, 20],[30, 30])
-# plt.plot([0, 20],[60, 60], linewidth=0.1)
-plt.legend(loc='upper right')
-plt.xlim(right=pixel_to_cm([2500]))
+    cm_array = cm_array - 9.7
+    plt.scatter(cm_array, percent_array, color=color_list[index], s=1, label=curve_names[index])
+
+plt.legend()
+plt.xlabel("Distance avec l'isocentre (cm)")
+plt.ylabel(r'Dose normalisée (D/D$_{max}$)')
 plt.ylim(bottom=0)
 plt.show()

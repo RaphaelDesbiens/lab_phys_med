@@ -1,10 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
-
 from profil_functions import read_profil, gray_to_od, pixel_to_cm, normalize_field_profile, \
-    measure_field_size, measure_penumbra, smooth, normalize_slanted_field_profile, apply_ppwt_factor, read_roi
-from a_etalonnage import od_to_dose
-from fit_functions import gaussian_fit, gaussian_function
+    measure_field_size, measure_penumbra, read_roi
 
 file_names = ["f) x", "f) y"]
 roi_file_names = ["f) x bas", "f) x haut", "f) y gauche", "f) y droite"]
@@ -65,6 +62,14 @@ for i, file_name in enumerate(file_names):
     for number, element in enumerate([first_roi_list, second_roi_list]):
         for stuff in element:
             pencil_edges[i][number].append(cm_array[stuff])
+
+    field_size = measure_field_size(cm_array, percent_array)
+
+    print(f"field_size = {field_size[1] - field_size[0]}")
+
+    left_penumbra, right_penumbra = measure_penumbra(cm_array, percent_array, [20, 80])
+    print(f"left_penumbra = {left_penumbra:.2f}")
+    print(f"right_penumbra = {right_penumbra:.2f}")
 
 x_gauche_diff = [field_edges[0][0] - pencil_edges[0][0][0], field_edges[0][0] - pencil_edges[0][1][0]]
 x_droite_diff = [pencil_edges[0][0][1] - field_edges[0][1], pencil_edges[0][1][1] - field_edges[0][1]]

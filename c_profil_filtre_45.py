@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 from profil_functions import read_profil, gray_to_od, pixel_to_cm, normalize_field_profile, \
-    measure_field_size, measure_penumbra, smooth, normalize_slanted_field_profile, apply_ppwt_factor
+    measure_field_size, smooth, normalize_slanted_field_profile, apply_ppwt_factor
 from a_etalonnage import od_to_dose
 from fit_functions import linear_fit
 import numpy as np
@@ -8,6 +8,7 @@ import numpy as np
 file_names = ["c) px", "c) py", "c) dx", "c) dy"]
 
 color_list = ['#FF0000', '#008000', '#0000FF', '#FFA500', '#800080', '#00FFFF', '#FF00FF']
+curve_names = ["Physique (x)", "Physique (y)", "Dynamique (x)", "Dynamique (y)"]
 
 offset_od_parameter = 0.29
 offset_pixel_parameter = 250
@@ -19,9 +20,6 @@ slanted_mean_range = 60
 top_doze_10cm_b_200MU = 2.37      # Gy
 top_doze_10cm_b_250MU = 2.5*top_doze_10cm_b_200MU/2
 
-# low_percent_pen_list = [30, 30, 35, 35]
-# high_percent_pen_list =[80, 80, 80, 80]
-
 od_profiles = []
 for file_name in file_names:
     pixel_list, gray_list = read_profil(file_name)
@@ -31,20 +29,13 @@ for file_name in file_names:
         gray_list = smooth(rough_gray_list, smooth_range)
         pixel_list = full_pixel_list[cut_range:-cut_range]
 
-    # plt.plot(pixel_list, gray_list)
-    # plt.scatter(full_pixel_list, rough_gray_list, s=1)
-
     od_list = gray_to_od(gray_list)
     od_profiles.append([pixel_list, od_list])
-
-# field_size_list = []
-# penumbra_list = []
 
 for index, od_profil in enumerate(od_profiles):
     raw_pixel_list = od_profil[0]
     od_list = od_profil[1]
     pixel_list = []
-    # plt.scatter(raw_pixel_list, od_list, color=color_list[index], s=1, label=file_names[index][-2:])
     for i, od in enumerate(od_list):
         if od > offset_od_parameter:
             offset = offset_pixel_parameter - i
@@ -52,7 +43,6 @@ for index, od_profil in enumerate(od_profiles):
             break
     cm_array = apply_ppwt_factor(pixel_to_cm(pixel_list))
     dose_array = od_to_dose(od_list)
-    # plt.scatter(cm_array, dose_array, color=color_list[index], s=1, label=file_names[index][-2:])
 
     percent_array, top_doze = None, None
     if file_names[index][-1] == "x":
@@ -84,22 +74,21 @@ for index, od_profil in enumerate(od_profiles):
         m, b = params[0], params[1]
         x_values = np.array([cm_array[slanted_field_indexes[0]], cm_array[slanted_field_indexes[1]]])
         y_values = m*x_values + b
-        plt.plot(x_values, y_values, color=color_list[index])
+        print(f"m = {m}")
 
         middle_cm_index = int((slanted_field_indexes[0] + slanted_field_indexes[1])/2)
         middle_cm = cm_array[middle_cm_index]
         middle_percent = m*middle_cm + b
         middle_dose = top_doze*middle_percent/100
-        # wedge_factor = middle_dose/top_doze_10cm_b_250MU
         wedge_factor = middle_dose / top_doze_10cm_b_250MU
         print(f"middle_dose = {middle_dose}")
         print(f"wedge_factor = {wedge_factor}")
 
-    plt.scatter(cm_array, percent_array, color=color_list[index], s=1, label=file_names[index][-2:])
+    cm_array = cm_array - 9.8
+    plt.scatter(cm_array, percent_array, color=color_list[index], s=1, label=curve_names[index])
 
-for y in [30, 35, 40, 45, 50]:
-    plt.plot([0, 21],[y, y])
-plt.legend(loc='upper right')
-plt.xlim(right=pixel_to_cm([2500]))
+plt.legend()
+plt.xlabel("Distance avec l'isocentre (cm)")
+plt.ylabel(r'Dose normalisée (D/D$_{max}$)')
 plt.ylim(bottom=0)
 plt.show()

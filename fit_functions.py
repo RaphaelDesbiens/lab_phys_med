@@ -1,6 +1,5 @@
 from scipy.optimize import curve_fit
 import numpy as np
-from math import exp, sqrt
 
 
 def linear_function(x, m, b):
@@ -56,3 +55,13 @@ def expon_function(x, a, mu):
 def expon_fit(x, y):
 
     return curve_fit(expon_function, x, y)
+
+
+def od_function(x, a, b, c):
+
+    return a + b/(x - c + 0.000001)
+
+
+def od_fit(x, y):
+
+    return curve_fit(od_function, x, y)
