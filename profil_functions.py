@@ -4,10 +4,10 @@ import statistics as stat
 import numpy as np
 
 
-def read_profil(file_name):
+def read_profil(file_name, distance='Distance_(pixels)'):
     file_path = os.path.join(r".\csv_files", file_name + ".csv")
     df = pd.read_csv(file_path)
-    pixel_list = df['Distance_(pixels)'].tolist()
+    pixel_list = df[distance].tolist()
     gray_list = df['Gray_Value'].tolist()
 
     return pixel_list, gray_list

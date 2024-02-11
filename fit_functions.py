@@ -65,3 +65,13 @@ def od_function(x, a, b, c):
 def od_fit(x, y):
 
     return curve_fit(od_function, x, y)
+
+
+def linear_function_b(x, m):
+
+    return m * x + 0.18181836773913193
+
+
+def linear_fit_b(x, y):
+
+    return curve_fit(linear_function_b, x, y)
