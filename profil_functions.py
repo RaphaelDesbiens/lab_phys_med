@@ -21,6 +21,14 @@ def read_roi(file_name):
     return roi_pixel_list
 
 
+def read_roi_inch(file_name):
+    roi_file_path = os.path.join(r".\csv_files", file_name + "_ROI.csv")
+    roi_df = pd.read_csv(roi_file_path)
+    roi_pixel_list = [int(inch*300) for inch in roi_df['X'].tolist()]
+
+    return roi_pixel_list
+
+
 def gray_to_od(gray_values_list, white_value=65535):
     optical_density = np.log10(white_value / np.array(gray_values_list))
 
@@ -109,3 +117,17 @@ def smooth(gray_list, mean_range):
         smoothed_list.append(stat.mean(gray_list[element:element + mean_range]))
 
     return smoothed_list
+
+
+def cut_replace(x_array, y_array, problems, buffer=20):
+    new_y_array = y_array
+    for extremities in problems:
+        start, end = extremities[0], extremities[1] + 1
+        x1, y1 = x_array[int(start - buffer/2)], stat.mean(y_array[start - 1 - buffer:start - 1])
+        x2, y2 = x_array[int(end + buffer/2)], stat.mean(y_array[end + 1:end + 1 + buffer])
+        m = (y2 - y1)/(x2 - x1)
+        b = y1 - m*x1
+        y_piece = m*x_array[start:end] + b
+        new_y_array = np.array(y_array[:start].tolist() + y_piece.tolist() + y_array[end:].tolist())
+
+    return new_y_array

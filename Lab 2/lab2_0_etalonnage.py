@@ -24,15 +24,23 @@ color_list = [
     ]
 
 od_values = []
+zero_value = None
 
 for i, file_name in enumerate(file_names):
     raw_pixel_list, raw_gray_list = read_profil(file_name)
     gray_value = mean(raw_gray_list)
+    if i == 0:
+        zero_value = (gray_value+1)*256 - 1
     od_value = gray_to_od(gray_value, 255)
     od_values.append(od_value)
 
 params, cov = linear_fit_b(doses[:-1], od_values[:-1])
 m, sigma_m = params[0], np.sqrt(cov[0][0])
+
+
+def zero_pixel_value():
+
+    return zero_value
 
 
 def calibrate(od_array):

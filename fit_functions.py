@@ -75,3 +75,13 @@ def linear_function_b(x, m):
 def linear_fit_b(x, y):
 
     return curve_fit(linear_function_b, x, y)
+
+
+def quadratic_function(x, a, b, c):
+
+    return a*x**2 + b*x + c
+
+
+def quadratic_fit(x, y):
+
+    return curve_fit(quadratic_function, x, y)

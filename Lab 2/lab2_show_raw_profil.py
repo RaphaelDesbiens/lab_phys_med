@@ -34,16 +34,13 @@ color_list = [
     u'#00FA9A', u'#48D1CC', u'#C71585', u'#191970', u'#F5FFFA', u'#FFE4E1'
     ]
 
-fig_etal, ax_etal = plt.subplots()
 for i, file_name in enumerate(etalonnage_file_names):
     raw_pixel_list, raw_gray_list = read_profil(file_name)
-    ax_etal.scatter(raw_pixel_list, raw_gray_list, s=0.5, color=color_list[i])
+    # plt.scatter(raw_pixel_list, raw_gray_list, s=0.5, color=color_list[i])
 
-fig, ax = plt.subplots()
 for i, file_name in enumerate(file_names):
     raw_pixel_list, raw_gray_list = read_profil(file_name, distance='Distance_(inches)')
-    ax.scatter(raw_pixel_list, raw_gray_list, s=0.5, color=color_list[i])
+    plt.scatter(raw_pixel_list, raw_gray_list, s=0.5, color=color_list[i])
     print(f"{file_name} --> {len(raw_pixel_list)} pixels")
 
-# fig_etal.show()
 plt.show()
