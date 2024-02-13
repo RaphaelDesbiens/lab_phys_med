@@ -1,13 +1,13 @@
 import matplotlib.pyplot as plt
 import numpy as np
-from profil_functions import read_profil, read_roi_inch, smooth, cut_replace
+from profil_functions import read_profil, read_roi_inch, smooth, cut_replace, find_smoothed_max
 from lab2_0_etalonnage import zero_pixel_value
 from fit_functions import quadratic_fit, quadratic_function
 
 file_name = "controle"
 problems = [[2060, 2062]]
 
-go_smooth = True
+go_smooth = False
 smooth_range = 55
 cut_range = int((smooth_range - 1)/2)
 
@@ -17,20 +17,22 @@ cut_indexes = read_roi_inch(file_name)
 start, end = cut_indexes[0], cut_indexes[1]
 short_inch_list, short_gray_list = raw_inch_list[start:end], repaired_gray_list[start:end]
 
-plt.scatter(short_inch_list, short_gray_list, s=0.7, color="r")
+# plt.scatter(short_inch_list, short_gray_list, s=0.7, color="r")
 # plt.scatter(raw_inch_list, repaired_gray_list, s=1.2, color="b")
 
 if go_smooth:
     short_gray_list = smooth(short_gray_list, smooth_range)
     short_inch_list = short_inch_list[cut_range:-cut_range]
 
+control_smoothed_max = find_smoothed_max(short_gray_list, 50)
+
 params, cov = quadratic_fit(short_inch_list, short_gray_list)
 a, b, c = params[0], params[1], params[2]
 
 
 def control_calibration(x_list, gray_list):
-
-    return gray_list + zero_pixel_value() - quadratic_function(x_list, a, b, c)
+    smoothed_max = find_smoothed_max(gray_list, 50)
+    return gray_list + zero_pixel_value() - quadratic_function(x_list, a, b, c) + control_smoothed_max - smoothed_max - 220
 
 
 calibrated_gray_array = control_calibration(np.array(short_inch_list), np.array(short_gray_list))

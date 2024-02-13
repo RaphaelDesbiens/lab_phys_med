@@ -1,20 +1,25 @@
-from profil_functions import read_profil, read_roi, cut_replace, smooth, gray_to_od
+import matplotlib.pyplot as plt
+import numpy as np
+from profil_functions import read_profil, read_roi, cut_replace, smooth, gray_to_od, read_roi_inch, linear_calibration
 from lab2_control import control_calibration
 from lab2_0_etalonnage import calibrate
 
 
-def file_to_dose(file_name, extremities, smooth_range=None):
-    inch_list, gray_list = read_profil(file_name)
-    roi = read_roi(file_name)
-    gray_list = cut_replace(inch_list, gray_list, extremities)
+def file_to_dose(file_name, problems, smooth_range=None):
+    inch_list, gray_list = read_profil(file_name, distance='Distance_(inches)')
+    roi = read_roi_inch(file_name)
+    inch_array, gray_array = np.array(inch_list), np.array(gray_list)
+    gray_array = cut_replace(inch_array, gray_array, problems)
     start, end = roi[0], roi[1]
-    inch_list, gray_list = inch_list[start:end], gray_list[start:end]
+    inch_array, gray_array = inch_array[start:end], gray_array[start:end]
     if smooth_range is not None:
         cut_range = int((smooth_range - 1) / 2)
-        gray_list = smooth(gray_list, smooth_range)
-        inch_list = inch_list[cut_range:-cut_range]
-    gray_list = control_calibration(inch_list, gray_list)
-    od_array = gray_to_od(gray_list)
+        gray_array = smooth(gray_array, smooth_range)
+        inch_array = inch_array[cut_range:-cut_range]
+    gray_array = control_calibration(inch_array, gray_array)
+    gray_array = linear_calibration(inch_array, gray_array)
+    od_array = gray_to_od(gray_array)
     dose_array = calibrate(od_array)
+    cm_array = np.array(inch_array)*2.54
 
-    return dose_array
+    return cm_array, dose_array

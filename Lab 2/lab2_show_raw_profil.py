@@ -1,5 +1,8 @@
 import matplotlib.pyplot as plt
+import numpy as np
+import os
 from profil_functions import read_profil
+import pandas as pd
 
 etalonnage_file_names = ['etalonnage_0.5Gy',
  'etalonnage_0.25Gy',
@@ -12,6 +15,12 @@ etalonnage_file_names = ['etalonnage_0.5Gy',
  'etalonnage_5Gy']
 
 file_names = ["1am", "1a4", "1am2", "1a7", "1bm", "2m", "24", "39", "39c", "315", "315c", "40", "4m", "5s", "515"]
+
+diode_file_names = ["1am", "1am2", "1bm"]
+
+rp_diode_file_names = ["39", "39c", "315", "315c"]
+
+control_file_names = ["controle", "controle_blanc_1", "controle_blanc_2"]
 
 color_list = [
     u'#FF0000', u'#008000', u'#0000FF', u'#FFA500', u'#800080', u'#00FFFF', u'#FF00FF', u'#808000',
@@ -40,7 +49,44 @@ for i, file_name in enumerate(etalonnage_file_names):
 
 for i, file_name in enumerate(file_names):
     raw_pixel_list, raw_gray_list = read_profil(file_name, distance='Distance_(inches)')
-    plt.scatter(raw_pixel_list, raw_gray_list, s=0.5, color=color_list[i])
-    print(f"{file_name} --> {len(raw_pixel_list)} pixels")
+    # plt.scatter(raw_pixel_list, raw_gray_list, s=1.5, color=color_list[i], label=file_name)
+    # plt.legend()
+    # plt.show()
 
+for i, file_name in enumerate(["39", "39c", "315", "315c"]):
+    raw_pixel_list, raw_gray_list = read_profil(file_name, distance='Distance_(inches)')
+    # plt.scatter(raw_pixel_list, raw_gray_list, s=1.5, color=color_list[i], label=file_name)
+    # plt.legend()
+
+for i, file_name in enumerate(["1am", "1a4", "1am2", "1a7"]):
+    raw_pixel_list, raw_gray_list = read_profil(file_name, distance='Distance_(inches)')
+    # plt.scatter(raw_pixel_list, raw_gray_list, s=1.5, color=color_list[i], label=file_name)
+
+for i, file_name in enumerate(control_file_names):
+    raw_pixel_list, raw_gray_list = read_profil(file_name, distance='Distance_(inches)')
+    if file_name == "controle":
+        raw_gray_list = np.array(raw_gray_list) + 12500
+    # plt.scatter(raw_pixel_list, raw_gray_list, s=0.8, color=color_list[i], label=file_name)
+    # plt.legend()
+    # plt.show()
+
+for i, file_name in enumerate(diode_file_names):
+    file_path = os.path.join(r".\csv_files", "diode_" + file_name + ".csv")
+    df = pd.read_csv(file_path, sep=';', skiprows=18)
+    pixel_list = df.iloc[:, 0].to_numpy()
+    gray_list = df.iloc[:, 3].to_numpy()
+    # plt.scatter(pixel_list, gray_list, s=1.5, color=color_list[i], label=file_name)
+    # plt.legend()
+    # plt.show()
+
+for i, file_name in enumerate(rp_diode_file_names):
+    file_path = os.path.join(r".\csv_files", "diode_" + file_name + ".csv")
+    df = pd.read_csv(file_path, sep=';', skiprows=18)
+    pixel_list = df.iloc[:, 2].to_numpy()
+    gray_list = df.iloc[:, 3].to_numpy()
+    plt.scatter(pixel_list, gray_list, s=1.5, color=color_list[i], label=file_name)
+    # plt.legend()
+    # plt.show()
+
+plt.legend()
 plt.show()

@@ -1,7 +1,10 @@
 from file_to_dose import file_to_dose
 
 file_names = ["40", "4m"]
-problems = []
+problems_list = [
+                 [[2100, 2104]],
+                 [[2100, 2102], [2286, 2287]]
+                ]
 smooth_range = None
 
 color_list = [

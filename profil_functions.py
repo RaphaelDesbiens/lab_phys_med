@@ -2,13 +2,14 @@ import pandas as pd
 import os
 import statistics as stat
 import numpy as np
+import matplotlib.pyplot as plt
 
 
-def read_profil(file_name, distance='Distance_(pixels)'):
+def read_profil(file_name, distance='Distance_(pixels)', y_name='Gray_Value'):
     file_path = os.path.join(r".\csv_files", file_name + ".csv")
     df = pd.read_csv(file_path)
     pixel_list = df[distance].tolist()
-    gray_list = df['Gray_Value'].tolist()
+    gray_list = df[y_name].tolist()
 
     return pixel_list, gray_list
 
@@ -116,7 +117,7 @@ def smooth(gray_list, mean_range):
     for element in range(len(gray_list) + 1 - mean_range):
         smoothed_list.append(stat.mean(gray_list[element:element + mean_range]))
 
-    return smoothed_list
+    return np.array(smoothed_list)
 
 
 def cut_replace(x_array, y_array, problems, buffer=20):
@@ -128,6 +129,64 @@ def cut_replace(x_array, y_array, problems, buffer=20):
         m = (y2 - y1)/(x2 - x1)
         b = y1 - m*x1
         y_piece = m*x_array[start:end] + b
-        new_y_array = np.array(y_array[:start].tolist() + y_piece.tolist() + y_array[end:].tolist())
+        new_y_array = np.array(new_y_array[:start].tolist() + y_piece.tolist() + new_y_array[end:].tolist())
 
     return new_y_array
+
+
+def recenter_open_profile(x_array, y_array):
+    field_edges = []        # cm
+    middle_y_value = (min(y_array) + max(y_array))/2
+    for i, y_value in enumerate(y_array):
+        if y_value >= middle_y_value:
+            field_edges.append(x_array[i])
+            break
+    for i, y_value in enumerate(reversed(y_array)):
+        if y_value >= middle_y_value:
+            original_index = len(y_array) - 1 - i
+            field_edges.append(x_array[original_index])
+            break
+
+    return x_array - stat.mean(field_edges)
+
+
+def normalize_open_profile(y_array):
+    field_edges = []        # index
+    threshold_y_value = 0.8*max(y_array)
+    for i, y_value in enumerate(y_array):
+        if y_value >= threshold_y_value:
+            field_edges.append(i)
+            break
+    for i, y_value in enumerate(reversed(y_array)):
+        if y_value >= threshold_y_value:
+            original_index = len(y_array) - 1 - i
+            field_edges.append(original_index)
+            break
+    field_size = field_edges[1] - field_edges[0]
+    left_edge = int(field_edges[0] + 0.15 * field_size)
+    right_edge = int(field_edges[1] - 0.15 * field_size)
+    top_value = stat.mean(y_array[left_edge:right_edge])
+    percent_array = 100*y_array/top_value
+
+    return percent_array
+
+
+def linear_calibration(x_array, y_array):
+    y1 = stat.mean(y_array[:50])
+    y2 = stat.mean(y_array[-50:])
+    x1 = x_array[25]
+    x2 = x_array[-25]
+    m = (y2 - y1)/(x2 - x1)
+    new_y_array = y_array - m*(x_array-min(x_array))
+
+    return new_y_array
+
+
+def find_smoothed_max(y_list, mean_range):
+    smoothed_max = 0
+    for element in range(len(y_list) + 1 - mean_range):
+        moving_mean = stat.mean(y_list[element:element + mean_range])
+        if moving_mean > smoothed_max:
+            smoothed_max = moving_mean
+
+    return smoothed_max
