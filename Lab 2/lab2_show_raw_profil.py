@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import os
-from profil_functions import read_profil
+from profil_functions import read_profil, read_profile_diode
 import pandas as pd
 
 etalonnage_file_names = ['etalonnage_0.5Gy',
@@ -47,9 +47,9 @@ for i, file_name in enumerate(etalonnage_file_names):
     raw_pixel_list, raw_gray_list = read_profil(file_name)
     # plt.scatter(raw_pixel_list, raw_gray_list, s=0.5, color=color_list[i])
 
-for i, file_name in enumerate(file_names):
+for i, file_name in enumerate(file_names[-2:]):
     raw_pixel_list, raw_gray_list = read_profil(file_name, distance='Distance_(inches)')
-    # plt.scatter(raw_pixel_list, raw_gray_list, s=1.5, color=color_list[i], label=file_name)
+    plt.scatter(raw_pixel_list, raw_gray_list, s=1.5, color=color_list[i], label=file_name)
     # plt.legend()
     # plt.show()
 
@@ -71,22 +71,12 @@ for i, file_name in enumerate(control_file_names):
     # plt.show()
 
 for i, file_name in enumerate(diode_file_names):
-    file_path = os.path.join(r".\csv_files", "diode_" + file_name + ".csv")
-    df = pd.read_csv(file_path, sep=';', skiprows=18)
-    pixel_list = df.iloc[:, 0].to_numpy()
-    gray_list = df.iloc[:, 3].to_numpy()
-    # plt.scatter(pixel_list, gray_list, s=1.5, color=color_list[i], label=file_name)
-    # plt.legend()
-    # plt.show()
+    mm_array, percent_array = read_profile_diode(file_name)
+    # plt.scatter(mm_array, percent_array, s=1.5, color=color_list[i], label=file_name)
 
 for i, file_name in enumerate(rp_diode_file_names):
-    file_path = os.path.join(r".\csv_files", "diode_" + file_name + ".csv")
-    df = pd.read_csv(file_path, sep=';', skiprows=18)
-    pixel_list = df.iloc[:, 2].to_numpy()
-    gray_list = df.iloc[:, 3].to_numpy()
-    plt.scatter(pixel_list, gray_list, s=1.5, color=color_list[i], label=file_name)
-    # plt.legend()
-    # plt.show()
+    mm_array, percent_array = read_profile_diode(file_name, x_column=2)
+    # plt.scatter(mm_array, percent_array, s=1.5, color=color_list[i], label=file_name)
 
 plt.legend()
 plt.show()

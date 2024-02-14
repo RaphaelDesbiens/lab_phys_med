@@ -14,6 +14,15 @@ def read_profil(file_name, distance='Distance_(pixels)', y_name='Gray_Value'):
     return pixel_list, gray_list
 
 
+def read_profile_diode(file_name, x_column=0, y_column=3):
+    file_path = os.path.join(r".\csv_files", "diode_" + file_name + ".csv")
+    df = pd.read_csv(file_path, sep=';', skiprows=18)
+    pixel_list = df.iloc[:, x_column].to_numpy()
+    gray_list = df.iloc[:, y_column].to_numpy()
+
+    return pixel_list, gray_list
+
+
 def read_roi(file_name):
     roi_file_path = os.path.join(r".\csv_files", file_name + "_ROI.csv")
     roi_df = pd.read_csv(roi_file_path)

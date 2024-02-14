@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 from file_to_dose import file_to_dose
-from profil_functions import recenter_open_profile, normalize_open_profile
+from profil_functions import recenter_open_profile, normalize_open_profile, read_profile_diode
+import pandas as pd
 
 file_names = ["1am", "1a4", "1am2", "1a7"]
 problems_list = [
@@ -11,9 +12,12 @@ problems_list = [
                 ]
 smooth_range = None         # None for no smoothing
 
-file_names_b = "1bm"
-problems_list_b = [[2144, 2147]]
+file_names_b = ["1bm"]
+problems_b = [[2144, 2147]]
 smooth_range_b = None         # None for no smoothing
+
+diode_file_names = ["1am", "1am2", "1bm"]
+color_equivalent = [0, 2, 4]
 
 color_list = [
     u'#FF0000', u'#008000', u'#0000FF', u'#FFA500', u'#800080', u'#00FFFF', u'#FF00FF', u'#808000',
@@ -24,8 +28,19 @@ for i, file_name in enumerate(file_names):
     cm_array, dose_array = file_to_dose(file_name, problems_list[i], smooth_range)
     cm_array = recenter_open_profile(cm_array, dose_array)
     percent_array = normalize_open_profile(dose_array)
-    # plt.scatter(cm_array, dose_array, s=0.7, label=file_name)
-    plt.scatter(cm_array, percent_array, s=0.7, label=file_name)
+    plt.scatter(cm_array, percent_array, s=0.7, label=file_name, color=color_list[i])
+
+for i, file_name in enumerate(file_names_b):
+    cm_array, dose_array = file_to_dose(file_name, problems_b, smooth_range_b)
+    cm_array = recenter_open_profile(cm_array, dose_array)
+    percent_array = normalize_open_profile(dose_array)
+    plt.scatter(cm_array, percent_array, s=0.7, label=file_name, color=color_list[4])
+
+for i, file_name in enumerate(diode_file_names):
+    mm_array, percent_array = read_profile_diode(file_name)
+    cm_array = mm_array/10
+    plt.scatter(cm_array, percent_array, s=3, color=color_list[color_equivalent[i]], label=file_name + " - diode",
+                marker='^')
 
 plt.legend()
 plt.show()
