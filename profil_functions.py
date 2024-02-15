@@ -14,13 +14,15 @@ def read_profil(file_name, distance='Distance_(pixels)', y_name='Gray_Value'):
     return pixel_list, gray_list
 
 
-def read_profile_diode(file_name, x_column=0, y_column=3):
+def read_profile_diode(file_name, x_column=0, y_column_normalized=3, y_column_current=4):
     file_path = os.path.join(r".\csv_files", "diode_" + file_name + ".csv")
     df = pd.read_csv(file_path, sep=';', skiprows=18)
-    pixel_list = df.iloc[:, x_column].to_numpy()
-    gray_list = df.iloc[:, y_column].to_numpy()
+    mm_array = df.iloc[:, x_column].to_numpy()
+    cm_array = mm_array/10
+    percent_array = df.iloc[:, y_column_normalized].to_numpy()
+    current_array = df.iloc[:, y_column_current].to_numpy()
 
-    return pixel_list, gray_list
+    return cm_array, percent_array, current_array
 
 
 def read_roi(file_name):
@@ -199,3 +201,32 @@ def find_smoothed_max(y_list, mean_range):
             smoothed_max = moving_mean
 
     return smoothed_max
+
+
+def measure_homog_and_sym(cm_array, percent_array, field_edges):
+    field_size = field_edges[1] - field_edges[0]
+    homog_field_left = field_edges[0] + 0.1 * field_size
+    homog_field_right = field_edges[1] - 0.1 * field_size
+    homog_field_indexes = []
+    for i, cm in enumerate(cm_array):
+        if cm > homog_field_left:
+            homog_field_indexes.append(i)
+            break
+    for i, cm in enumerate(cm_array):
+        if cm > homog_field_right:
+            homog_field_indexes.append(i - 1)
+            break
+    homog_percent_array = sym_percent_array = percent_array[homog_field_indexes[0]:homog_field_indexes[1]]
+    homog_max, homog_min = max(homog_percent_array), min(homog_percent_array)
+    homog = homog_max - homog_min
+
+    sym_middle_index = int(len(sym_percent_array) / 2)
+    s_p_a_left = sym_percent_array[:sym_middle_index]
+    s_p_a_right = sym_percent_array[sym_middle_index:]
+    if len(s_p_a_left) < len(s_p_a_right):
+        s_p_a_left = np.append(s_p_a_left, s_p_a_right[0])
+    if len(s_p_a_left) > len(s_p_a_right):
+        s_p_a_right = np.append(s_p_a_right, s_p_a_left[0])
+    sym_deviation = max(abs(np.array(s_p_a_left) - np.array(s_p_a_right)[::-1]))
+
+    return homog, sym_deviation

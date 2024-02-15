@@ -24,8 +24,7 @@ for i, file_name in enumerate(file_names):
     plt.scatter(cm_array, percent_array, s=0.3, label=file_name, color=color_list[i])
 
 for i, file_name in enumerate(file_names):
-    mm_array, percent_array = read_profile_diode(file_name, x_column=2)
-    cm_array = mm_array / 10
+    cm_array, percent_array, current_array = read_profile_diode(file_name, x_column=2)
     plt.scatter(cm_array, percent_array, s=8, color=color_list[i], label=file_name + " - diode",
                 marker='^')
 
