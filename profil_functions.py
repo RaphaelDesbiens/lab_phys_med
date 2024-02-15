@@ -80,6 +80,7 @@ def normalize_slanted_field_profile(dose_array, slanted_mean_range):
 
     return 100*dose_array/top_dose, top_dose
 
+
 def measure_field_size(cm_array, percent_array):
     field_dimensions = []
     for index, percent in enumerate(percent_array):
@@ -218,7 +219,7 @@ def measure_homog_and_sym(cm_array, percent_array, field_edges):
             break
     homog_percent_array = sym_percent_array = percent_array[homog_field_indexes[0]:homog_field_indexes[1]]
     homog_max, homog_min = max(homog_percent_array), min(homog_percent_array)
-    homog = homog_max - homog_min
+    homog = 100 + (homog_max - homog_min)/2
 
     sym_middle_index = int(len(sym_percent_array) / 2)
     s_p_a_left = sym_percent_array[:sym_middle_index]

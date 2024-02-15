@@ -29,7 +29,7 @@ for i, file_name in enumerate(file_names):
     print(f"--- {file_name} ---")
     cm_array, dose_array = file_to_dose(file_name, problems_list[i], smooth_range)
     cm_array = recenter_open_profile(cm_array, dose_array)
-    # plt.scatter(cm_array, dose_array, s=0.7, label=file_name, color=color_list[i])
+    plt.scatter(cm_array, dose_array, s=0.7, label=file_name, color=color_list[i])
     percent_array = normalize_open_profile(dose_array)
     # plt.scatter(cm_array, percent_array, s=0.7, label=file_name, color=color_list[i])
 
@@ -46,11 +46,13 @@ for i, file_name in enumerate(file_names):
 
 
 for i, file_name in enumerate(file_names_b):
+    print(f"--- {file_name} ---")
     cm_array, dose_array = file_to_dose(file_name, problems_b, smooth_range_b)
     cm_array = recenter_open_profile(cm_array, dose_array)
-    # plt.scatter(cm_array, dose_array, s=0.7, label=file_name, color=color_list[4])
+    plt.scatter(cm_array, dose_array, s=0.7, label=file_name, color=color_list[4])
     percent_array = normalize_open_profile(dose_array)
     # plt.scatter(cm_array, percent_array, s=0.7, label=file_name, color=color_list[4])
+
     field_edges = measure_field_size(cm_array, percent_array)
     field_size = field_edges[1] - field_edges[0]
     print(f"field_size = {field_size:.2f}")
@@ -63,11 +65,24 @@ for i, file_name in enumerate(file_names_b):
     print(f"Sym. : {sym_deviation:.2f} %\n")
 
 for i, file_name in enumerate(diode_file_names):
+    print(f"--- diode_{file_name} ---")
     cm_array, percent_array, current_array = read_profile_diode(file_name)
-    plt.scatter(cm_array, current_array, s=3, color=color_list[color_equivalent[i]], label=file_name + " - diode",
-                marker='^')
+    cm_array = -cm_array
+    # plt.scatter(cm_array, current_array, s=3, color=color_list[color_equivalent[i]], label=file_name + " - diode",
+    #             marker='^')
     # plt.scatter(cm_array, percent_array, s=3, color=color_list[color_equivalent[i]], label=file_name + " - diode",
     #             marker='^')
+
+    field_edges = measure_field_size(cm_array, percent_array)
+    field_size = field_edges[1] - field_edges[0]
+    print(f"field_size = {field_size:.2f}")
+
+    left_penumbra, right_penumbra = measure_penumbra(cm_array, percent_array, [20, 80])
+    print(f"penumbras = [{left_penumbra:.2f}, {right_penumbra:.2f}]")
+
+    homog, sym_deviation = measure_homog_and_sym(cm_array, percent_array, field_edges)
+    print(f"Homog. : {homog:.2f} %")
+    print(f"Sym. : {sym_deviation:.2f} %\n")
 
 plt.legend()
 plt.show()

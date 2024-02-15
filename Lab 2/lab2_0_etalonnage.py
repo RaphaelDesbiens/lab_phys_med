@@ -29,6 +29,7 @@ zero_value = None
 for i, file_name in enumerate(file_names):
     raw_pixel_list, raw_gray_list = read_profil(file_name)
     gray_value = mean(raw_gray_list)
+    # print(f"{file_name[11:]} --> {(gray_value + 1)*256 - 1}")
     if i == 0:
         zero_value = (gray_value+1)*256 - 1
     od_value = gray_to_od(gray_value, 255)

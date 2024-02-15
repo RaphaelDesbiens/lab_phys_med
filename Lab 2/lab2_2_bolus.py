@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 from file_to_dose import file_to_dose
-from profil_functions import recenter_open_profile, normalize_slanted_field_profile
+from profil_functions import recenter_open_profile, normalize_slanted_field_profile, measure_field_size, \
+    measure_penumbra
 
 file_names = ["2m", "24"]
 problems_list = [
@@ -22,7 +23,15 @@ for i, file_name in enumerate(file_names):
     else:
         cm_array = cm_array - 0.55
     percent_array, top_dose = normalize_slanted_field_profile(dose_array, 80)
+
     plt.scatter(cm_array, percent_array, s=0.7, label=file_name)
+
+    field_edges = measure_field_size(cm_array, percent_array)
+    field_size = field_edges[1] - field_edges[0]
+    print(f"field_size = {field_size:.2f}")
+
+    left_penumbra, right_penumbra = measure_penumbra(cm_array, percent_array, [20, 80])
+    print(f"penumbras = [{left_penumbra:.2f}, {right_penumbra:.2f}]")
 
 plt.legend()
 plt.show()

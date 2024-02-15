@@ -15,12 +15,16 @@ def file_to_dose(file_name, problems, smooth_range=None, is_open_profile=True):
     if smooth_range is not None:
         cut_range = int((smooth_range - 1) / 2)
         gray_array = smooth(gray_array, smooth_range)
+        print(f"{gray_array[int(len(gray_array) / 2)]}")
+        print(f"{max(gray_array)}\n")
         inch_array = inch_array[cut_range:-cut_range]
     gray_array = control_calibration(inch_array, gray_array)
+    # print(f"{gray_array[int(len(gray_array) / 2)]}")
+    # print(f"{max(gray_array)}\n")
     if is_open_profile:
         gray_array = linear_calibration(inch_array, gray_array)
     od_array = gray_to_od(gray_array)
     dose_array = calibrate(od_array)
     cm_array = np.array(inch_array)*2.54
 
-    return cm_array, dose_array
+    return cm_array, dose_array/2
