@@ -25,32 +25,40 @@ color_list = [
     u'#800000', u'#008080', u'#000080', u'#808080', u'#FFFF00', u'#00FF00', u'#FFC0CB', u'#FFD700',
     u'#FF4500', u'#DA70D6', u'#EEE8AA']
 
+dose = None
 for i, file_name in enumerate(file_names):
     print(f"--- {file_name} ---")
     cm_array, dose_array = file_to_dose(file_name, problems_list[i], smooth_range)
     cm_array = recenter_open_profile(cm_array, dose_array)
     plt.scatter(cm_array, dose_array, s=0.7, label=file_name, color=color_list[i])
-    percent_array = normalize_open_profile(dose_array)
+    percent_array, top_dose = normalize_open_profile(dose_array)
+    print(f"top_dose = {top_dose:.2f} Gy")
     # plt.scatter(cm_array, percent_array, s=0.7, label=file_name, color=color_list[i])
+    if file_name in ["1am", "1am2"]:
+        dose = top_dose
+    if file_name in ["1a4", "1a7"]:
+        pdd = 100*top_dose/dose
+        print(f"PDD = {pdd:.2f} %")
+
 
     field_edges = measure_field_size(cm_array, percent_array)
     field_size = field_edges[1] - field_edges[0]
     print(f"field_size = {field_size:.2f}")
 
     left_penumbra, right_penumbra = measure_penumbra(cm_array, percent_array, [20, 80])
-    print(f"penumbras = [{left_penumbra:.2f}, {right_penumbra:.2f}]")
+    print(f"penumbras = [{left_penumbra:.2f} - {right_penumbra:.2f}]")
 
     homog, sym_deviation = measure_homog_and_sym(cm_array, percent_array, field_edges)
     print(f"Homog. : {homog:.2f} %")
     print(f"Sym. : {sym_deviation:.2f} %\n")
-
 
 for i, file_name in enumerate(file_names_b):
     print(f"--- {file_name} ---")
     cm_array, dose_array = file_to_dose(file_name, problems_b, smooth_range_b)
     cm_array = recenter_open_profile(cm_array, dose_array)
     plt.scatter(cm_array, dose_array, s=0.7, label=file_name, color=color_list[4])
-    percent_array = normalize_open_profile(dose_array)
+    percent_array, top_dose = normalize_open_profile(dose_array)
+    print(f"top_dose = {top_dose:.2f} Gy")
     # plt.scatter(cm_array, percent_array, s=0.7, label=file_name, color=color_list[4])
 
     field_edges = measure_field_size(cm_array, percent_array)
@@ -58,7 +66,7 @@ for i, file_name in enumerate(file_names_b):
     print(f"field_size = {field_size:.2f}")
 
     left_penumbra, right_penumbra = measure_penumbra(cm_array, percent_array, [20, 80])
-    print(f"penumbras = [{left_penumbra:.2f}, {right_penumbra:.2f}]")
+    print(f"penumbras = [{left_penumbra:.2f} - {right_penumbra:.2f}]")
 
     homog, sym_deviation = measure_homog_and_sym(cm_array, percent_array, field_edges)
     print(f"Homog. : {homog:.2f} %")

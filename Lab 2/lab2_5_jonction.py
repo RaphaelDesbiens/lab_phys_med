@@ -17,7 +17,7 @@ color_list = [
 for i, file_name in enumerate(file_names):
     cm_array, dose_array = file_to_dose(file_name, problems_list[i], smooth_range)
     cm_array = recenter_open_profile(cm_array, dose_array)
-    percent_array = normalize_open_profile(dose_array)
+    percent_array, top_dose = normalize_open_profile(dose_array)
     plt.scatter(cm_array, percent_array, s=0.7, label=file_name, color=color_list[i])
 
 plt.legend()

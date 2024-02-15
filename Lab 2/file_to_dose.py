@@ -5,22 +5,20 @@ from lab2_control import control_calibration
 from lab2_0_etalonnage import calibrate
 
 
-def file_to_dose(file_name, problems, smooth_range=None, is_open_profile=True):
+def file_to_dose(file_name, problems, smooth_range=None, is_open_profile=True, numero_3=False):
     inch_list, gray_list = read_profil(file_name, distance='Distance_(inches)')
     roi = read_roi_inch(file_name)
     inch_array, gray_array = np.array(inch_list), np.array(gray_list)
     gray_array = cut_replace(inch_array, gray_array, problems)
     start, end = roi[0], roi[1]
+    if numero_3:
+        end = end + 32
     inch_array, gray_array = inch_array[start:end], gray_array[start:end]
     if smooth_range is not None:
         cut_range = int((smooth_range - 1) / 2)
         gray_array = smooth(gray_array, smooth_range)
-        print(f"{gray_array[int(len(gray_array) / 2)]}")
-        print(f"{max(gray_array)}\n")
         inch_array = inch_array[cut_range:-cut_range]
     gray_array = control_calibration(inch_array, gray_array)
-    # print(f"{gray_array[int(len(gray_array) / 2)]}")
-    # print(f"{max(gray_array)}\n")
     if is_open_profile:
         gray_array = linear_calibration(inch_array, gray_array)
     od_array = gray_to_od(gray_array)

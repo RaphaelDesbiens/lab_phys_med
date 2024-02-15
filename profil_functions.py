@@ -180,7 +180,7 @@ def normalize_open_profile(y_array):
     top_value = stat.mean(y_array[left_edge:right_edge])
     percent_array = 100*y_array/top_value
 
-    return percent_array
+    return percent_array, top_value
 
 
 def linear_calibration(x_array, y_array):
