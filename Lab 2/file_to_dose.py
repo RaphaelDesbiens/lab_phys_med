@@ -5,7 +5,7 @@ from lab2_control import control_calibration
 from lab2_0_etalonnage import calibrate
 
 
-def file_to_dose(file_name, problems, smooth_range=None, is_open_profile=True, numero_3=False):
+def file_to_dose(file_name, problems, smooth_range=None, is_open_profile=True, numero_3=False, numero_4=False):
     inch_list, gray_list = read_profil(file_name, distance='Distance_(inches)')
     roi = read_roi_inch(file_name)
     inch_array, gray_array = np.array(inch_list), np.array(gray_list)
@@ -13,6 +13,8 @@ def file_to_dose(file_name, problems, smooth_range=None, is_open_profile=True, n
     start, end = roi[0], roi[1]
     if numero_3:
         end = end + 32
+    if numero_4:
+        end = end + 15
     inch_array, gray_array = inch_array[start:end], gray_array[start:end]
     if smooth_range is not None:
         cut_range = int((smooth_range - 1) / 2)

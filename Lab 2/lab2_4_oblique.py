@@ -15,10 +15,47 @@ color_list = [
     u'#800000', u'#008080', u'#000080', u'#808080', u'#FFFF00', u'#00FF00', u'#FFC0CB', u'#FFD700',
     u'#FF4500', u'#DA70D6', u'#EEE8AA']
 
+cm_arrays_list, percent_arrays_list = [], []
 for i, file_name in enumerate(file_names):
-    cm_array, dose_array = file_to_dose(file_name, problems_list[i], smooth_range, is_open_profile=False)
+    print(f"--- {file_name} ---")
+    cm_array, dose_array = file_to_dose(file_name, problems_list[i], smooth_range, is_open_profile=False, numero_4=True)
     cm_array = max(cm_array) - cm_array
     percent_array, top_dose = normalize_slanted_field_profile(dose_array, slanted_mean_range)
-    plt.scatter(cm_array, percent_array, s=0.7, label=file_name, color=color_list[i])
+    # plt.scatter(cm_array, percent_array, s=0.7, label=file_name, color=color_list[i])
 
-plt.show()
+    cm_arrays_list.append(cm_array)
+    percent_arrays_list.append(percent_array)
+
+    r_50 = None
+    for i, element in enumerate(percent_array):
+        if element >= 50:
+            r_50 = cm_array[i]
+            print(f"R50 = {r_50:.2f}")
+            break
+    for i, element in enumerate(percent_array):
+        if element >= 80:
+            r_80 = cm_array[i]
+            print(f"R80 = {r_80:.2f}")
+            break
+    for i, element in enumerate(percent_array):
+        if element >= 90:
+            r_90 = cm_array[i]
+            print(f"R90 = {r_90:.2f}")
+            break
+    r_p = 1.271 * r_50 - 0.23
+    print(f"R_p = {r_p:.2f}")
+    e_p0 = 0.22 + 1.98 * r_p + 0.0025 * r_p ** 2
+    print(f"E_p0 = {e_p0:.2f}")
+    e_0 = 0.656 + 2.059 * r_50 + 0.022 * r_50 ** 2
+    print(f"E_0 = {e_0:.2f}")
+    print("\n")
+
+
+def get_4_arrays():
+
+    return cm_arrays_list, percent_arrays_list
+
+
+if __name__ == "__main__":
+
+    plt.show()
